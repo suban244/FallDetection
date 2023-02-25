@@ -197,7 +197,9 @@ int main() {
 
   sleep_ms(5000);
 
-  gpio_put(LED_PIN, 1);
+  // sendText();
+
+  // gpio_put(LED_PIN, 1);
   while (1) {
     mpu6050_read_raw(acceleration, gyro, &temp);
     printf("Acc. X = %d, Y = %d, Z = %d\n", acceleration[0], acceleration[1],
@@ -209,9 +211,12 @@ int main() {
 
     if (acceleration[2] < 0) {
       if (!sent) {
+        gpio_put(LED_PIN, 1);
         sendText();
         sent = true;
+        gpio_put(LED_PIN, 0);
       }
+    } else {
     }
 
     sleep_ms(100);
