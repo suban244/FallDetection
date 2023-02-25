@@ -16,7 +16,9 @@ pico_sdk_init()
 add_executable(${PROJECT_NAME}
 
   # main.c
-  uart.c
+  combined.c
+
+  # uart.c
 
   # blink.c
 )
