@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include "TFLModel.h"
 #include "mpu.h"
 #include "uart.h"
 
@@ -21,6 +22,7 @@ int main() {
 
   initUART();
   initMPU();
+  TFLModel model = TFLModel();
 
   int16_t acceleration[3], gyro[3], temp;
   float acc[3];
@@ -39,15 +41,17 @@ int main() {
     // // Note this is chip temperature.
     // printf("Temp. = %f\n", (temp / 340.0) + 36.53);
 
-    if (acceleration[2] < 0) {
-      if (!sent) {
-        gpio_put(LED_PIN, 1);
-        sendText();
-        sent = true;
-        gpio_put(LED_PIN, 0);
-      }
-    } else {
-    }
+    // if (acceleration[2] < 0) {
+    //   if (!sent) {
+    //     gpio_put(LED_PIN, 1);
+    //     sendText();
+    //     sent = true;
+    //     gpio_put(LED_PIN, 0);
+    //   }
+    // } else {
+    // }
+
+    model.loop();
 
     sleep_ms(100);
   }
