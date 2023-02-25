@@ -1,16 +1,4 @@
-/**
- * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
-#include <stdio.h>
-#include <string.h>
-
-#include "hardware/i2c.h"
-#include "pico/binary_info.h"
-#include "pico/stdlib.h"
-
+#include "mpu.h"
 /* Example code to talk to a MPU6050 MEMS accelerometer and gyroscope
 
    This is taking to simple approach of simply reading registers. It's perfectly
@@ -35,7 +23,7 @@
 static int addr = 0x68;
 
 #ifdef i2c_default
-static void mpu6050_reset() {
+void mpu6050_reset() {
   // Two byte reset. First byte register, second byte data
   // There are a load more options to set up the device in different ways that
   // could be added here
@@ -49,7 +37,7 @@ static void mpu6050_reset() {
   sleep_ms(100);
 }
 
-static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
+void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
   // For this particular device, we send the device the register we want to read
   // first, then subsequently read from the device. The register is auto
   // incrementing so we don't need to keep sending the register we want, just
@@ -95,24 +83,9 @@ void preprocessAcc(int16_t accleration[3], float acc[3]) {
     acc[i] = (float)accleration[i] / someConst;
   }
 }
-
 #endif
 
-int main() {
-  stdio_init_all();
-  const uint LED_PIN = PICO_DEFAULT_LED_PIN;
-  gpio_init(LED_PIN);
-  gpio_set_dir(LED_PIN, GPIO_OUT);
-  gpio_put(LED_PIN, 1);
-
-#if !defined(i2c_default) || !defined(PICO_DEFAULT_I2C_SDA_PIN) || \
-    !defined(PICO_DEFAULT_I2C_SCL_PIN)
-#warning i2c/mpu6050_i2c example requires a board with I2C pins
-  puts("Default I2C pins were not defined");
-#else
-  printf("Hello, MPU6050! Reading raw data from registers...\n");
-
-  // This example will use I2C0 on the default SDA and SCL pins (4, 5 on a Pico)
+void initMPU() {
   // i2c_init(i2c_default, 400 * 1000);
   i2c_init(i2c_default, 9600);
   gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
@@ -124,23 +97,4 @@ int main() {
                              GPIO_FUNC_I2C));
 
   mpu6050_reset();
-
-  int16_t acceleration[3], gyro[3], temp;
-  float acc[3];
-
-  while (1) {
-    mpu6050_read_raw(acceleration, gyro, &temp);
-    preprocessAcc(acceleration, acc);
-    printf("Acc. X = %d, Y = %d, Z = %d\n", acceleration[0], acceleration[1],
-           acceleration[2]);
-    printf("Gyro. X = %d, Y = %d, Z = %d\n", gyro[0], gyro[1], gyro[2]);
-    // Temperature is simple so use the datasheet calculation to get deg C.
-    // Note this is chip temperature.
-    printf("Temp. = %f\n", (temp / 340.0) + 36.53);
-
-    sleep_ms(100);
-  }
-
-#endif
-  return 0;
 }

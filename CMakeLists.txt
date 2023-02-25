@@ -15,12 +15,11 @@ pico_sdk_init()
 # Tell CMake where to find the executable source file
 add_executable(${PROJECT_NAME}
 
-  # main.c
-  combined.c
-
-  # uart.c
-
-  # blink.c
+  combined.cpp
+  mpu.cpp
+  mpu.h
+  uart.cpp
+  uart.h
 )
 
 # Create map/bin/hex/uf2 files
