@@ -47,6 +47,33 @@ void on_uart_rx() {
   gpio_put(LED_PIN, 0);
 }
 
+void sendText() {
+  char endingChar[] = " \n";
+  endingChar[0] = (char)26;
+
+  sleep_ms(1000);
+  printf("SendingAT\n");
+  // uart_puts(UART_ID, "AT\n");
+  printf("anju");
+  uart_puts(UART_ID, "AT+CMGF=1\n");
+  sleep_ms(1000);
+
+  printf("chhetri");
+  uart_puts(UART_ID, "AT+CMGS=\"+9779848655422\"\r\n");
+  sleep_ms(1000);
+
+  printf("yunika");
+  uart_puts(UART_ID,
+            "Fall detected. \nLocation: \nLatitude: 27.61821. \nLongitude: "
+            "85.5545");
+  sleep_ms(100);
+
+  printf("Bajracharya");
+  uart_puts(UART_ID, endingChar);
+  sleep_ms(100);
+  printf("Done");
+}
+
 int main() {
   // Set up our UART with a basic baud rate.
   uart_init(UART_ID, 2400);
@@ -77,11 +104,11 @@ int main() {
   int UART_IRQ = UART_ID == uart0 ? UART0_IRQ : UART1_IRQ;
 
   // And set up and enable the interrupt handlers
-  irq_set_exclusive_handler(UART_IRQ, on_uart_rx);
-  irq_set_enabled(UART_IRQ, true);
+  // irq_set_exclusive_handler(UART_IRQ, on_uart_rx);
+  // irq_set_enabled(UART_IRQ, true);
 
   // Now enable the UART to send interrupts - RX only
-  uart_set_irq_enables(UART_ID, true, false);
+  // uart_set_irq_enables(UART_ID, true, false);
 
   // OK, all set up.
   // Lets send a basic string out, and then run a loop and wait for RX
@@ -89,9 +116,11 @@ int main() {
   // back with a slight change!
 
   sleep_ms(5000);
-  printf("SendingAT\n");
-  uart_puts(UART_ID, "AT\n");
-  sleep_ms(5000);
+  printf("SendingTEXT \n");
+  // uart_puts(UART_ID, "AT\n");
+  // sleep_ms(5000);
+
+  sendText();
 
   while (1) tight_loop_contents();
 }

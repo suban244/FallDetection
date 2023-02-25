@@ -17,6 +17,8 @@ add_executable(${PROJECT_NAME}
 
   # main.c
   uart.c
+
+  # blink.c
 )
 
 # Create map/bin/hex/uf2 files
