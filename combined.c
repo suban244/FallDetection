@@ -131,13 +131,13 @@ void sendText() {
   uart_puts(UART_ID, "AT+CMGS=\"+9779848655422\"\r\n");
   sleep_ms(1000);
 
-  printf("yunika");
+  printf(".....\n");
   uart_puts(UART_ID,
             "Fall detected. \nLocation: \nLatitude: 27.61821. \nLongitude: "
             "85.5545");
   sleep_ms(100);
 
-  printf("Bajracharya");
+  printf("\n..........");
   uart_puts(UART_ID, endingChar);
   sleep_ms(100);
   printf("Done");
