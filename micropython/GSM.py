@@ -7,6 +7,7 @@ txData = b'AT\r\n'
 
 
 def sendSMS(uart: UART, number: str):
+    print("sendingSMS")
     while uart.any():
         uart.read(1)
     time.sleep(0.1)
