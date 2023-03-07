@@ -20,8 +20,8 @@
 
 // We are using pins 0 and 1, but see the GPIO function select table in the
 // datasheet for information on which other pins can be used.
-#define UART_TX_PIN 0
-#define UART_RX_PIN 1
+#define UART_TX_PIN 16
+#define UART_RX_PIN 17
 
 #include <stdio.h>
 #include <string.h>
@@ -144,11 +144,14 @@ void sendText() {
 }
 
 int main() {
+  bool state = false;
   bool sent = false;
   stdio_init_all();
   const uint LED_PIN = PICO_DEFAULT_LED_PIN;
   gpio_init(LED_PIN);
   gpio_set_dir(LED_PIN, GPIO_OUT);
+
+  gpio_put(LED_PIN, 1);
 
   uart_init(UART_ID, 2400);
   stdio_init_all();
@@ -182,13 +185,12 @@ int main() {
   // This example will use I2C0 on the default SDA and SCL pins (4, 5 on a Pico)
   // i2c_init(i2c_default, 400 * 1000);
   i2c_init(i2c_default, 9600);
-  gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
-  gpio_set_function(PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C);
-  gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
-  gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
+  gpio_set_function(8, GPIO_FUNC_I2C);
+  gpio_set_function(9, GPIO_FUNC_I2C);
+  gpio_pull_up(8);
+  gpio_pull_up(9);
   // Make the I2C pins available to picotool
-  bi_decl(bi_2pins_with_func(PICO_DEFAULT_I2C_SDA_PIN, PICO_DEFAULT_I2C_SCL_PIN,
-                             GPIO_FUNC_I2C));
+  bi_decl(bi_2pins_with_func(8, 9, GPIO_FUNC_I2C));
 
   mpu6050_reset();
 
@@ -197,13 +199,13 @@ int main() {
 
   sleep_ms(5000);
 
-  // sendText();
+  sendText();
 
-  // gpio_put(LED_PIN, 1);
+  gpio_put(LED_PIN, state);
   while (1) {
     mpu6050_read_raw(acceleration, gyro, &temp);
-    printf("Acc. X = %d, Y = %d, Z = %d\n", acceleration[0], acceleration[1],
-           acceleration[2]);
+    // printf("Acc. X = %d, Y = %d, Z = %d\n", acceleration[0], acceleration[1],
+    //        acceleration[2]);
     // printf("Gyro. X = %d, Y = %d, Z = %d\n", gyro[0], gyro[1], gyro[2]);
     // // Temperature is simple so use the datasheet calculation to get deg C.
     // // Note this is chip temperature.
@@ -211,15 +213,15 @@ int main() {
 
     if (acceleration[2] < 0) {
       if (!sent) {
-        gpio_put(LED_PIN, 1);
         sendText();
         sent = true;
-        gpio_put(LED_PIN, 0);
       }
     } else {
     }
 
     sleep_ms(100);
+    gpio_put(LED_PIN, state);
+    state = !state;
   }
 
 #endif
