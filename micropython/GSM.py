@@ -27,7 +27,14 @@ def sendSMS(uart: UART, number: str):
     while uart.any() > 0:
         rxData += uart.read(1)
 
-    print(rxData.decode('utf-8'))
+           
+    try:
+        print(rxData.decode('utf-8'))
+    except:
+        print(len(rxData))
+        print(rxData)
+        
+            
     time.sleep(1)
 
 
@@ -39,4 +46,7 @@ def checkStatus(uart: UART):
     while uart.any() > 0:
         rxData += uart.read(1)
 
-    print(len(rxData), rxData.decode('utf-8'))
+    try:
+        print(len(rxData), rxData.decode('utf-8'))
+    except:
+        print('fuck')
