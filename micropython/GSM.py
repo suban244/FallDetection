@@ -18,7 +18,7 @@ def sendSMS(uart: UART, number: str):
     time.sleep(1)
     uart.write(words.encode('utf-8'))
     time.sleep(1)
-    uart.write(b'hello from micropython\nBye')
+    uart.write(b'Fall detected. \nLocation: \nLatitude: 27.61821. \nLongitude: 85.5545')
     time.sleep(0.1)
     uart.write(endingchar)
     time.sleep(1)
@@ -27,7 +27,10 @@ def sendSMS(uart: UART, number: str):
     while uart.any() > 0:
         rxData += uart.read(1)
 
-    print(rxData.decode('utf-8'))
+    try:
+        print(rxData.decode('utf-8'))
+    except:
+        print(rxData)
     time.sleep(1)
 
 
@@ -39,4 +42,7 @@ def checkStatus(uart: UART):
     while uart.any() > 0:
         rxData += uart.read(1)
 
-    print(len(rxData), rxData.decode('utf-8'))
+    try:
+        print(len(rxData), rxData.decode('utf-8'))
+    except:
+        print(rxData)
