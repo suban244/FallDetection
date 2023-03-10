@@ -14,19 +14,18 @@ setupi2c_str = ', run "sudo curl -L https://piico.dev/i2csetup | bash". Suppress
 if _SYSNAME == 'microbit':
     from microbit import i2c
     from utime import sleep_ms
-
+    
 elif _SYSNAME == 'Linux':
     from smbus2 import SMBus, i2c_msg
     from time import sleep
     from math import ceil
-
+    
     def sleep_ms(t):
         sleep(t/1000)
 
 else:
     from machine import I2C, Pin
     from utime import sleep_ms
-
 
 class I2CBase:
     def writeto_mem(self, addr, memaddr, buf, *, addrsize=8):
@@ -44,15 +43,13 @@ class I2CBase:
     def __init__(self, bus=None, freq=None, sda=None, scl=None):
         raise NotImplementedError('__init__')
 
-
 class I2CUnifiedMachine(I2CBase):
     def __init__(self, bus=None, freq=None, sda=None, scl=None):
         if bus is not None and freq is not None and sda is not None and scl is not None:
             print('Using supplied freq, sda and scl to create machine I2C')
             self.i2c = I2C(bus, freq=freq, sda=sda, scl=scl)
         elif _SYSNAME == 'esp32' and (bus is None and freq is None and sda is None and scl is None):
-            raise Exception(
-                'Please input bus, frequency, machine.pin SDA and SCL objects to use ESP32')
+            raise Exception('Please input bus, frequency, machine.pin SDA and SCL objects to use ESP32')
         else:
             self.i2c = I2C(0, scl=Pin(9), sda=Pin(8), freq=100000)
 
@@ -64,29 +61,26 @@ class I2CUnifiedMachine(I2CBase):
             self.i2c.writeto(addr, data)
         else:
             self.i2c.writeto(addr, reg + data)
-
+            
     def read16(self, addr, reg):
         self.i2c.writeto(addr, reg, False)
         return self.i2c.readfrom(addr, 2)
-
 
 class I2CUnifiedMicroBit(I2CBase):
     def __init__(self, freq=None):
         if freq is not None:
             print('Initialising I2C freq to {}'.format(freq))
             microbit.i2c.init(freq=freq)
-
+            
     def writeto_mem(self, addr, memaddr, buf, *, addrsize=8):
-        # pad address for eg. 16 bit
-        ad = memaddr.to_bytes(addrsize // 8, 'big')
+        ad = memaddr.to_bytes(addrsize // 8, 'big')  # pad address for eg. 16 bit
         i2c.write(addr, ad + buf)
-
+        
     def readfrom_mem(self, addr, memaddr, nbytes, *, addrsize=8):
-        # pad address for eg. 16 bit
-        ad = memaddr.to_bytes(addrsize // 8, 'big')
+        ad = memaddr.to_bytes(addrsize // 8, 'big')  # pad address for eg. 16 bit
         i2c.write(addr, ad, repeat=True)
-        return i2c.read(addr, nbytes)
-
+        return i2c.read(addr, nbytes)    
+    
     def write8(self, addr, reg, data):
         if reg is None:
             i2c.write(addr, data)
@@ -96,8 +90,7 @@ class I2CUnifiedMicroBit(I2CBase):
     def read16(self, addr, reg):
         i2c.write(addr, reg, repeat=True)
         return i2c.read(addr, 2)
-
-
+            
 class I2CUnifiedLinux(I2CBase):
     def __init__(self, bus=None, suppress_warnings=True):
         if suppress_warnings == False:
@@ -118,13 +111,13 @@ class I2CUnifiedLinux(I2CBase):
         self.i2c = SMBus(bus)
 
     def readfrom_mem(self, addr, memaddr, nbytes, *, addrsize=8):
-        data = [None] * nbytes  # initialise empty list
+        data = [None] * nbytes # initialise empty list
         self.smbus_i2c_read(addr, memaddr, data, nbytes, addrsize=addrsize)
         return data
-
+    
     def writeto_mem(self, addr, memaddr, buf, *, addrsize=8):
         self.smbus_i2c_write(addr, memaddr, buf, len(buf), addrsize=addrsize)
-
+    
     def smbus_i2c_write(self, address, reg, data_p, length, addrsize=8):
         ret_val = 0
         data = []
@@ -138,15 +131,13 @@ class I2CUnifiedLinux(I2CBase):
             raise Exception('address must be 8 or 16 bits long only')
         self.i2c.i2c_rdwr(msg_w)
         return ret_val
-
+        
     def smbus_i2c_read(self, address, reg, data_p, length, addrsize=8):
         ret_val = 0
         if addrsize == 8:
-            # warning this is set up for 16-bit addresses
-            msg_w = i2c_msg.write(address, [reg])
+            msg_w = i2c_msg.write(address, [reg]) # warning this is set up for 16-bit addresses
         elif addrsize == 16:
-            # warning this is set up for 16-bit addresses
-            msg_w = i2c_msg.write(address, [reg >> 8, reg & 0xff])
+            msg_w = i2c_msg.write(address, [reg >> 8, reg & 0xff]) # warning this is set up for 16-bit addresses
         else:
             raise Exception('address must be 8 or 16 bits long only')
         msg_r = i2c_msg.read(address, length)
@@ -155,7 +146,7 @@ class I2CUnifiedLinux(I2CBase):
             for index in range(length):
                 data_p[index] = ord(msg_r.buf[index])
         return ret_val
-
+    
     def write8(self, addr, reg, data):
         if reg is None:
             d = int.from_bytes(data, 'big')
@@ -164,11 +155,10 @@ class I2CUnifiedLinux(I2CBase):
             r = int.from_bytes(reg, 'big')
             d = int.from_bytes(data, 'big')
             self.i2c.write_byte_data(addr, r, d)
-
+    
     def read16(self, addr, reg):
         regInt = int.from_bytes(reg, 'big')
         return self.i2c.read_word_data(addr, regInt).to_bytes(2, byteorder='little', signed=False)
-
 
 def create_unified_i2c(bus=None, freq=None, sda=None, scl=None, suppress_warnings=True):
     if _SYSNAME == 'microbit':

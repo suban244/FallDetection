@@ -1,3 +1,3 @@
 sleep 5
 echo "starting"
-python read.py "fallback1.csv"
+python read.py "fallRight2.csv"
