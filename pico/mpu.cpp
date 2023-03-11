@@ -22,7 +22,6 @@
 // By default these devices  are on bus address 0x68
 static int addr = 0x68;
 
-#ifdef i2c_default
 void mpu6050_reset() {
   // Two byte reset. First byte register, second byte data
   // There are a load more options to set up the device in different ways that
@@ -83,7 +82,6 @@ void preprocessAcc(int16_t accleration[3], float acc[3]) {
     acc[i] = (float)accleration[i] / someConst;
   }
 }
-#endif
 
 void initMPU() {
   // i2c_init(i2c_default, 400 * 1000);

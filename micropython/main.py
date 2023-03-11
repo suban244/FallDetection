@@ -64,4 +64,3 @@ while True:
 
     sleep_ms(int(delay_time - diff))
     led.toggle()
-
