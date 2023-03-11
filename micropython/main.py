@@ -12,7 +12,8 @@ led.value(1)
 
 
 uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
-motion = PiicoDev_MPU6050(bus=0, freq=9600, sda=Pin(4), scl=Pin(5))
+motion = PiicoDev_MPU6050(bus=0, freq=9600, sda=Pin(8), scl=Pin(9))
+# motion = PiicoDev_MPU6050(bus=0, freq=9600, sda=Pin(4), scl=Pin(5))
 samples_per_second = 10
 delay_time = 1000/10
 
@@ -61,5 +62,6 @@ while True:
     if diff > delay_time:
         diff = delay_time
 
-    sleep_ms(delay_time - diff)
+    sleep_ms(int(delay_time - diff))
     led.toggle()
+
