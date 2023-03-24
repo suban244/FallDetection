@@ -3,7 +3,7 @@ import time
 import csv
 import sys
 # Open the serial port with PySerial
-ser = serial.Serial('/dev/ttyACM1', 9600)  # IMU data
+ser = serial.Serial('/dev/ttyACM0', 9600)  # IMU data
 # ser1 = serial.Serial('/dev/ttyACM0', 115200)  # GSM and bluetooth
 
 start = time.time()
@@ -19,7 +19,7 @@ with open(filename, 'w') as csvfile:
     csvwriter.writerow(fields)
     print("STarting")
     while True:
-        if success >= 70:
+        if success >= 40:
             break
         try:
             line = ser.readline().decode()
