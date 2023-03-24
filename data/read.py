@@ -19,7 +19,11 @@ with open(filename, 'w') as csvfile:
     csvwriter.writerow(fields)
     print("STarting")
     while True:
+<<<<<<< Updated upstream
         if success >= 40:
+=======
+        if success >= 3 * 10 * 1:
+>>>>>>> Stashed changes
             break
         try:
             line = ser.readline().decode()
@@ -37,4 +41,5 @@ with open(filename, 'w') as csvfile:
                     print(success, varlist)
 
         except:
+            print("error")
             continue

@@ -19,6 +19,10 @@ def uartSend(uart: UART, data: bytes, delay: float = 0.1):
     time.sleep(0.1)
 
 
+<<<<<<< Updated upstream
+=======
+# Doesn't work
+>>>>>>> Stashed changes
 def getLocation(uart: UART):
     print("Getting location")
     while uart.any():

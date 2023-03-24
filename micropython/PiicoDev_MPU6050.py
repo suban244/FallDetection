@@ -49,15 +49,16 @@ _maxFails = 3
 # Address
 _MPU6050_ADDRESS = 0x68
 
+
 def signedIntFromBytes(x, endian='big'):
     y = int.from_bytes(x, endian)
     if (y >= 0x8000):
         return -((65535 - y) + 1)
     else:
         return y
-    
 
-class PiicoDev_MPU6050(object):     
+
+class PiicoDev_MPU6050(object):
     def __init__(self, bus=None, freq=None, sda=None, scl=None, addr=_MPU6050_ADDRESS):
         self._failCount = 0
         self._terminatingFailCount = 0
@@ -93,7 +94,7 @@ class PiicoDev_MPU6050(object):
                 if failCount >= _maxFails:
                     self._terminatingFailCount = self._terminatingFailCount + 1
                     print(i2c_err_str.format(self.addr))
-                    return {'x': float('NaN'), 'y': float('NaN'), 'z': float('NaN')} 
+                    return {'x': float('NaN'), 'y': float('NaN'), 'z': float('NaN')}
         x = signedIntFromBytes(data[0:2])
         y = signedIntFromBytes(data[2:4])
         z = signedIntFromBytes(data[4:6])
@@ -104,30 +105,30 @@ class PiicoDev_MPU6050(object):
             return
 
         ax, ay, az, gx, gy, gz = offs
-        self.__writeWords(0x6 , 1, ax)
-        self.__writeWords(0x8 , 1, ay)
-        self.__writeWords(0xa , 1, az)
+        self.__writeWords(0x6, 1, ax)
+        self.__writeWords(0x8, 1, ay)
+        self.__writeWords(0xa, 1, az)
         self.__writeWords(0x13, 1, gx)
         self.__writeWords(0x15, 1, gy)
         self.__writeWords(0x17, 1, gz)
 
-    def __writeBytes(self, reg:int, buff) -> None:
+    def __writeBytes(self, reg: int, buff) -> None:
         self.i2c.writeto_mem(self.addr, reg, buff)
-        
-    def __writeWords(self, reg:int, length:int, val) -> None:
+
+    def __writeWords(self, reg: int, length: int, val) -> None:
         if isinstance(val, int):
             L = int(length * 2)
             val = bytearray(val.to_bytes(L, 'big'))
-            
+
         if isinstance(val, (list, tuple)):
             val = bytearray(val)
-            
+
         if isinstance(val, bytearray):
             self.__writeBytes(reg, val)
 
-
     # Reads the temperature from the onboard temperature sensor of the MPU-6050.
     # Returns the temperature [degC].
+
     def read_temperature(self):
         try:
             rawData = self.i2c.readfrom_mem(self.addr, _TEMP_OUT0, 2)
@@ -147,10 +148,10 @@ class PiicoDev_MPU6050(object):
     # Gets the range the accelerometer is set to.
     # raw=True: Returns raw value from the ACCEL_CONFIG register
     # raw=False: Return integer: -1, 2, 4, 8 or 16. When it returns -1 something went wrong.
-    def get_accel_range(self, raw = False):
+    def get_accel_range(self, raw=False):
         # Get the raw value
         raw_data = self.i2c.readfrom_mem(self.addr, _ACCEL_CONFIG, 2)
-        
+
         if raw is True:
             return raw_data[0]
         elif raw is False:
@@ -167,7 +168,7 @@ class PiicoDev_MPU6050(object):
 
     # Reads and returns the X, Y and Z values from the accelerometer.
     # Returns dictionary data in g or m/s^2 (g=False)
-    def read_accel_data(self, g = False):         
+    def read_accel_data(self, g=False):
         accel_data = self._readData(_ACCEL_XOUT0)
         accel_range = self._accel_range
         scaler = None
@@ -196,7 +197,7 @@ class PiicoDev_MPU6050(object):
             return {'x': x, 'y': y, 'z': z}
 
     def read_accel_abs(self, g=False):
-        d=self.read_accel_data(g)
+        d = self.read_accel_data(g)
         return sqrt(d['x']**2+d['y']**2+d['z']**2)
 
     def set_gyro_range(self, gyro_range):
@@ -206,7 +207,7 @@ class PiicoDev_MPU6050(object):
     # Gets the range the gyroscope is set to.
     # raw=True: return raw value from GYRO_CONFIG register
     # raw=False: return range in deg/s
-    def get_gyro_range(self, raw = False):
+    def get_gyro_range(self, raw=False):
         # Get the raw value
         raw_data = self.i2c.readfrom_mem(self.addr, _GYRO_CONFIG, 2)
 
@@ -248,8 +249,8 @@ class PiicoDev_MPU6050(object):
 
         return {'x': x, 'y': y, 'z': z}
 
-    def read_angle(self): # returns radians. orientation matches silkscreen
-        a=self.read_accel_data()
-        x=atan2(a['y'],a['z'])
-        y=atan2(-a['x'],a['z'])
+    def read_angle(self):  # returns radians. orientation matches silkscreen
+        a = self.read_accel_data()
+        x = atan2(a['y'], a['z'])
+        y = atan2(-a['x'], a['z'])
         return {'x': x, 'y': y}
