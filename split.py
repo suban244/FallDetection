@@ -3,14 +3,14 @@ import random
 import pandas as pd
 import csv
 
-filename = 'walkSaurav1'
+filename = 'idleSuban0'
 filepath = 'data/'+filename+'.csv'
 df = pd.read_csv(filepath)
 
 input_seq_length = 30
 df_len = df.shape[0]
 
-for i in range(30):
+for i in range(75):
     starting_index = np.random.randint(0, high=df_len-input_seq_length)
     df2 = df.iloc[starting_index: starting_index + input_seq_length]
 

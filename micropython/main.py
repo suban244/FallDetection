@@ -5,6 +5,7 @@ from time import sleep
 from machine import UART
 from PiicoDev_Unified import sleep_ms
 from PiicoDev_MPU6050 import PiicoDev_MPU6050
+from RuleBased import FallDetector
 # from nic import converter
 
 from machine import Pin
@@ -18,6 +19,10 @@ led = Pin("LED", Pin.OUT)
 count = 0
 messageSent = False
 
+uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
+motion = PiicoDev_MPU6050(bus=0, freq=9600, sda=Pin(8), scl=Pin(9))
+fallDetector = FallDetector()
+# motion = PiicoDev_MPU6050(bus=0, freq=19200, sda=Pin(4), scl=Pin(5))
 
 def callback(pin):
     global interrupt_flag, debounce_time, messageSent
@@ -27,7 +32,7 @@ def callback(pin):
             interrupt_flag = 1
             if not messageSent:
                 print("message time interrupt")
-                sendSMS(uart=uart0, number="9848655422")
+                sendSMS(uart=uart0, number="9861598998", callForHelp=True)
                 checkStatus(uart=uart0)
                 messageSent = True
 
@@ -36,29 +41,7 @@ def callback(pin):
 
 pin.irq(trigger=Pin.IRQ_FALLING, handler=callback)
 
-
-def callback(pin):
-    global interrupt_flag, debounce_time, messageSent
-
-    if (time.ticks_ms() - debounce_time) > 50:
-        if (time.ticks_ms() - debounce_time) < 500:
-            interrupt_flag = 1
-            if not messageSent:
-                print("message time interrupt")
-                sendSMS(uart=uart0, number="9848655422")
-                checkStatus(uart=uart0)
-                messageSent = True
-
-        debounce_time = time.ticks_ms()
-
-
-pin.irq(trigger=Pin.IRQ_FALLING, handler=callback)
-
-
-# uart0 = UART(0, baudrate=9600, tx=Pin(16), rx=Pin(17))
-# motion = PiicoDev_MPU6050(bus=0, freq=9600, sda=Pin(8), scl=Pin(9))
-motion = PiicoDev_MPU6050(bus=0, freq=19200, sda=Pin(4), scl=Pin(5))
-samples_per_second = 10
+samples_per_second = 20
 delay_time = 1000/samples_per_second
 
 sleep(0.5)
@@ -69,7 +52,7 @@ Green_Offsets = (1153, 23, 2345, 8, 51, 57)
 motion._setOffset(Yellow_Offsets)
 
 
-checkStatus(uart=uart0)
+# checkStatus(uart=uart0)
 # getLocation(uart=uart0)
 time.sleep(1)
 
@@ -92,25 +75,28 @@ while True:
     gY = gyro["y"]
     gZ = gyro["z"]
 
-    print(f"{str(aX)},{str(aY)},{str(aZ)},{str(gX)},{str(gY)},{str(gZ)}")
-    if aX > 3:
+#     print(f"{str(aX)},{str(aY)},{str(aZ)},{str(gX)},{str(gY)},{str(gZ)}")
+#     print(f"gx:{str(gX)}, gy:{str(gY)}, gz:{str(gZ)}")
+#     if aX < -8 or aX > 8:
+    if fallDetector.ruleBasedInference(accel, gyro):
         if not messageSent:
             print("message time")
-            # sendSMS(uart=uart0, number="9848655422")
+            sendSMS(uart=uart0, number="9861598998")
             checkStatus(uart=uart0)
             messageSent = True
 
 #     converter(accel)
 
-#     if interrupt_flag is 1:
-#         interrupt_flag=0
-#         print("Interrupt Detected")
-#         led.toggle()
+    if interrupt_flag is 1:
+        interrupt_flag=0
+        print("Interrupt Detected")
+        led.toggle()
 
     end = time.ticks_ms()
     diff = time.ticks_diff(end, start)
+#     print(f"Diff: {diff}")
     if diff > delay_time:
         diff = delay_time
-
+ 
     sleep_ms(int(delay_time - diff))
     led.toggle()

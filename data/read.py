@@ -3,8 +3,7 @@ import time
 import csv
 import sys
 # Open the serial port with PySerial
-ser = serial.Serial('/dev/ttyACM0', 9600)  # IMU data
-# ser1 = serial.Serial('/dev/ttyACM0', 115200)  # GSM and bluetooth
+ser = serial.Serial('/dev/ttyACM1', 9600)  # IMU data
 
 start = time.time()
 queue = []
@@ -14,16 +13,13 @@ fields = ['ax', 'ay', 'az', 'gx', 'gy', 'gz']
 filename = sys.argv[1]
 success = 0
 
+
 with open(filename, 'w') as csvfile:
     csvwriter = csv.writer(csvfile)
     csvwriter.writerow(fields)
     print("STarting")
     while True:
-<<<<<<< Updated upstream
-        if success >= 40:
-=======
-        if success >= 3 * 10 * 1:
->>>>>>> Stashed changes
+        if success >= 60 * 20 * 10:
             break
         try:
             line = ser.readline().decode()
